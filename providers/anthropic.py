@@ -53,6 +53,7 @@ class AnthropicModelProvider(OpenAICompatibleProvider):
             supports_images=True,
             supports_streaming=True,
             supports_extended_thinking=True,
+            aliases=["opus", "opus-4"],
         ),
         "claude-sonnet-4": ModelCapabilities(
             model_name="claude-sonnet-4",
@@ -63,6 +64,7 @@ class AnthropicModelProvider(OpenAICompatibleProvider):
             supports_images=True,
             supports_streaming=True,
             supports_extended_thinking=True,
+            aliases=["sonnet", "sonnet-4"],
         ),
         # Claude 3.7 Series
         "claude-3.7-sonnet": ModelCapabilities(
@@ -74,6 +76,7 @@ class AnthropicModelProvider(OpenAICompatibleProvider):
             supports_images=True,
             supports_streaming=True,
             supports_extended_thinking=True,
+            aliases=["sonnet-3.7"],
         ),
         # Claude 3.5 Series (October 2024)
         "claude-3.5-sonnet": ModelCapabilities(
@@ -85,6 +88,7 @@ class AnthropicModelProvider(OpenAICompatibleProvider):
             supports_images=True,
             supports_streaming=True,
             supports_extended_thinking=False,
+            aliases=["sonnet-3.5"],
         ),
         "claude-3.5-haiku": ModelCapabilities(
             model_name="claude-3.5-haiku",
@@ -95,19 +99,8 @@ class AnthropicModelProvider(OpenAICompatibleProvider):
             supports_images=True,
             supports_streaming=True,
             supports_extended_thinking=False,
+            aliases=["haiku", "haiku-3.5"],
         ),
-    }
-
-    # Model aliases for convenience
-    MODEL_ALIASES: ClassVar[dict[str, str]] = {
-        "opus": "claude-opus-4",
-        "opus-4": "claude-opus-4",
-        "sonnet": "claude-sonnet-4",
-        "sonnet-4": "claude-sonnet-4",
-        "sonnet-3.7": "claude-3.7-sonnet",
-        "sonnet-3.5": "claude-3.5-sonnet",
-        "haiku": "claude-3.5-haiku",
-        "haiku-3.5": "claude-3.5-haiku",
     }
 
     def __init__(self, api_key: str, **kwargs):
