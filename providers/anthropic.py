@@ -31,11 +31,14 @@ class AnthropicModelProvider(OpenAICompatibleProvider):
     - Support for Anthropic-compatible proxy services
     - Flexibility for enterprise deployments with custom endpoints
 
-    Default endpoint: https://api.anthropic.com (would require native SDK)
+    Default endpoint: https://api.anthropic.com/v1 (would require native SDK)
     For OpenAI-compatible Anthropic proxies, set ANTHROPIC_BASE_URL accordingly.
     """
 
     FRIENDLY_NAME = "Anthropic"
+
+    # Track whether we've already logged the native SDK warning
+    _sdk_warning_logged = False
 
     # Basic model capabilities for common Anthropic models
     # These are conservative defaults; actual capabilities may vary
@@ -86,12 +89,14 @@ class AnthropicModelProvider(OpenAICompatibleProvider):
         # Log if using custom endpoint
         if default_base_url != "https://api.anthropic.com/v1":
             logger.info(f"Using custom Anthropic endpoint: {default_base_url}")
-        else:
-            logger.warning(
+        elif not AnthropicModelProvider._sdk_warning_logged:
+            # Only warn once about native SDK requirement
+            logger.debug(
                 "Anthropic provider initialized with default endpoint. "
                 "Note: Full native Anthropic API support requires the 'anthropic' SDK. "
                 "For OpenAI-compatible Anthropic proxies, set ANTHROPIC_BASE_URL."
             )
+            AnthropicModelProvider._sdk_warning_logged = True
 
         super().__init__(api_key, **kwargs)
 
