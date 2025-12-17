@@ -6,6 +6,8 @@ from typing import TYPE_CHECKING, ClassVar, Optional
 if TYPE_CHECKING:
     from tools.models import ToolModelCategory
 
+from utils.env import get_env
+
 from .openai_compatible import OpenAICompatibleProvider
 from .registries.openai import OpenAIModelRegistry
 from .registry_provider_mixin import RegistryBackedProviderMixin
@@ -28,8 +30,14 @@ class OpenAIModelProvider(RegistryBackedProviderMixin, OpenAICompatibleProvider)
     def __init__(self, api_key: str, **kwargs):
         """Initialize OpenAI provider with API key."""
         self._ensure_registry()
-        # Set default OpenAI base URL, allow override for regions/custom endpoints
-        kwargs.setdefault("base_url", "https://api.openai.com/v1")
+        # Allow override via OPENAI_BASE_URL for third-party compatible APIs
+        default_base_url = get_env("OPENAI_BASE_URL", "https://api.openai.com/v1")
+        kwargs.setdefault("base_url", default_base_url)
+
+        # Log if using custom endpoint
+        if default_base_url != "https://api.openai.com/v1":
+            logger.info(f"Using custom OpenAI endpoint: {default_base_url}")
+
         super().__init__(api_key, **kwargs)
         self._invalidate_capability_cache()
 
