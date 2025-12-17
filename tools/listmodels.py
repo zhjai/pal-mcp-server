@@ -100,6 +100,7 @@ class ListModelsTool(BaseTool):
         provider_info = {
             ProviderType.GOOGLE: {"name": "Google Gemini", "env_key": "GEMINI_API_KEY"},
             ProviderType.OPENAI: {"name": "OpenAI", "env_key": "OPENAI_API_KEY"},
+            ProviderType.ANTHROPIC: {"name": "Anthropic", "env_key": "ANTHROPIC_API_KEY"},
             ProviderType.AZURE: {"name": "Azure OpenAI", "env_key": "AZURE_OPENAI_API_KEY"},
             ProviderType.XAI: {"name": "X.AI (Grok)", "env_key": "XAI_API_KEY"},
             ProviderType.DIAL: {"name": "AI DIAL", "env_key": "DIAL_API_KEY"},
@@ -144,73 +145,73 @@ class ListModelsTool(BaseTool):
                 lines.append("  - Supports structured code generation")
             return lines
 
-        # Check each native provider type
+        # Check each native provider type - only show configured providers
         for provider_type, info in provider_info.items():
             # Check if provider is enabled
             provider = ModelProviderRegistry.get_provider(provider_type)
             is_configured = provider is not None
 
-            output_lines.append(f"## {info['name']} {'✅' if is_configured else '❌'}")
+            # Skip unconfigured providers
+            if not is_configured:
+                continue
 
-            if is_configured:
-                output_lines.append("**Status**: Configured and available")
-                has_restrictions = bool(restriction_service and restriction_service.has_restrictions(provider_type))
+            output_lines.append(f"## {info['name']} ✅")
 
-                if has_restrictions:
-                    restricted_names = sorted(set(restricted_models_by_provider.get(provider_type, [])))
+            output_lines.append("**Status**: Configured and available")
+            has_restrictions = bool(restriction_service and restriction_service.has_restrictions(provider_type))
 
-                    if restricted_names:
-                        output_lines.append("\n**Models (policy restricted)**:")
-                        for model_name in restricted_names:
-                            output_lines.extend(format_model_entry(provider, model_name))
-                    else:
-                        output_lines.append("\n*No models are currently allowed by restriction policy.*")
+            if has_restrictions:
+                restricted_names = sorted(set(restricted_models_by_provider.get(provider_type, [])))
+
+                if restricted_names:
+                    output_lines.append("\n**Models (policy restricted)**:")
+                    for model_name in restricted_names:
+                        output_lines.extend(format_model_entry(provider, model_name))
                 else:
-                    output_lines.append("\n**Models**:")
-
-                    aliases = []
-                    for model_name, capabilities in provider.get_capabilities_by_rank():
-                        try:
-                            description = capabilities.description or "No description available"
-                        except AttributeError:
-                            description = "No description available"
-
-                        try:
-                            context_window = capabilities.context_window or 0
-                        except AttributeError:
-                            context_window = 0
-
-                        if context_window >= 1_000_000:
-                            context_str = f"{context_window // 1_000_000}M context"
-                        elif context_window >= 1_000:
-                            context_str = f"{context_window // 1_000}K context"
-                        else:
-                            context_str = f"{context_window} context" if context_window > 0 else "unknown context"
-
-                        output_lines.append(f"- `{model_name}` - {context_str}")
-                        output_lines.append(f"  - {description}")
-                        if capabilities.allow_code_generation:
-                            output_lines.append("  - Supports structured code generation")
-
-                        for alias in capabilities.aliases or []:
-                            if alias != model_name:
-                                aliases.append(f"- `{alias}` → `{model_name}`")
-
-                    if aliases:
-                        output_lines.append("\n**Aliases**:")
-                        output_lines.extend(sorted(aliases))
+                    output_lines.append("\n*No models are currently allowed by restriction policy.*")
             else:
-                output_lines.append(f"**Status**: Not configured (set {info['env_key']})")
+                output_lines.append("\n**Models**:")
+
+                aliases = []
+                for model_name, capabilities in provider.get_capabilities_by_rank():
+                    try:
+                        description = capabilities.description or "No description available"
+                    except AttributeError:
+                        description = "No description available"
+
+                    try:
+                        context_window = capabilities.context_window or 0
+                    except AttributeError:
+                        context_window = 0
+
+                    if context_window >= 1_000_000:
+                        context_str = f"{context_window // 1_000_000}M context"
+                    elif context_window >= 1_000:
+                        context_str = f"{context_window // 1_000}K context"
+                    else:
+                        context_str = f"{context_window} context" if context_window > 0 else "unknown context"
+
+                    output_lines.append(f"- `{model_name}` - {context_str}")
+                    output_lines.append(f"  - {description}")
+                    if capabilities.allow_code_generation:
+                        output_lines.append("  - Supports structured code generation")
+
+                    for alias in capabilities.aliases or []:
+                        if alias != model_name:
+                            aliases.append(f"- `{alias}` → `{model_name}`")
+
+                if aliases:
+                    output_lines.append("\n**Aliases**:")
+                    output_lines.extend(sorted(aliases))
 
             output_lines.append("")
 
-        # Check OpenRouter
+        # Check OpenRouter - only show if configured
         openrouter_key = get_env("OPENROUTER_API_KEY")
         is_openrouter_configured = openrouter_key and openrouter_key != "your_openrouter_api_key_here"
 
-        output_lines.append(f"## OpenRouter {'✅' if is_openrouter_configured else '❌'}")
-
         if is_openrouter_configured:
+            output_lines.append("## OpenRouter ✅")
             output_lines.append("**Status**: Configured and available")
             output_lines.append("**Description**: Access to multiple cloud AI providers via unified API")
 
@@ -306,18 +307,14 @@ class ListModelsTool(BaseTool):
             except Exception as e:
                 logger.exception("Error listing OpenRouter models: %s", e)
                 output_lines.append(f"**Error loading models**: {str(e)}")
-        else:
-            output_lines.append("**Status**: Not configured (set OPENROUTER_API_KEY)")
-            output_lines.append("**Note**: Provides access to GPT-5, O3, Mistral, and many more")
 
-        output_lines.append("")
+            output_lines.append("")
 
-        # Check Custom API
+        # Check Custom API - only show if configured
         custom_url = get_env("CUSTOM_API_URL")
 
-        output_lines.append(f"## Custom/Local API {'✅' if custom_url else '❌'}")
-
         if custom_url:
+            output_lines.append("## Custom/Local API ✅")
             output_lines.append("**Status**: Configured and available")
             output_lines.append(f"**Endpoint**: {custom_url}")
             output_lines.append("**Description**: Local models via Ollama, vLLM, LM Studio, etc.")
@@ -341,11 +338,8 @@ class ListModelsTool(BaseTool):
 
             except Exception as e:
                 output_lines.append(f"**Error loading custom models**: {str(e)}")
-        else:
-            output_lines.append("**Status**: Not configured (set CUSTOM_API_URL)")
-            output_lines.append("**Example**: CUSTOM_API_URL=http://localhost:11434 (for Ollama)")
 
-        output_lines.append("")
+            output_lines.append("")
 
         # Add summary
         output_lines.append("## Summary")
