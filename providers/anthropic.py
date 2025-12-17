@@ -43,36 +43,71 @@ class AnthropicModelProvider(OpenAICompatibleProvider):
     # Basic model capabilities for common Anthropic models
     # These are conservative defaults; actual capabilities may vary
     MODEL_CAPABILITIES: ClassVar[dict[str, ModelCapabilities]] = {
-        "claude-3-opus": ModelCapabilities(
-            model_name="claude-3-opus",
-            friendly_name="Claude 3 Opus",
+        # Claude 4 Series (Latest - May 2025)
+        "claude-opus-4": ModelCapabilities(
+            model_name="claude-opus-4",
+            friendly_name="Claude Opus 4",
             provider=ProviderType.ANTHROPIC,
             context_window=200_000,
-            max_output_tokens=4_096,
+            max_output_tokens=32_000,
+            supports_images=True,
+            supports_streaming=True,
+            supports_extended_thinking=True,
+        ),
+        "claude-sonnet-4": ModelCapabilities(
+            model_name="claude-sonnet-4",
+            friendly_name="Claude Sonnet 4",
+            provider=ProviderType.ANTHROPIC,
+            context_window=200_000,
+            max_output_tokens=16_000,
+            supports_images=True,
+            supports_streaming=True,
+            supports_extended_thinking=True,
+        ),
+        # Claude 3.7 Series
+        "claude-3.7-sonnet": ModelCapabilities(
+            model_name="claude-3.7-sonnet",
+            friendly_name="Claude 3.7 Sonnet",
+            provider=ProviderType.ANTHROPIC,
+            context_window=200_000,
+            max_output_tokens=8_192,
+            supports_images=True,
+            supports_streaming=True,
+            supports_extended_thinking=True,
+        ),
+        # Claude 3.5 Series (October 2024)
+        "claude-3.5-sonnet": ModelCapabilities(
+            model_name="claude-3.5-sonnet",
+            friendly_name="Claude 3.5 Sonnet",
+            provider=ProviderType.ANTHROPIC,
+            context_window=200_000,
+            max_output_tokens=8_192,
             supports_images=True,
             supports_streaming=True,
             supports_extended_thinking=False,
         ),
-        "claude-3-sonnet": ModelCapabilities(
-            model_name="claude-3-sonnet",
-            friendly_name="Claude 3 Sonnet",
+        "claude-3.5-haiku": ModelCapabilities(
+            model_name="claude-3.5-haiku",
+            friendly_name="Claude 3.5 Haiku",
             provider=ProviderType.ANTHROPIC,
             context_window=200_000,
-            max_output_tokens=4_096,
+            max_output_tokens=8_192,
             supports_images=True,
             supports_streaming=True,
             supports_extended_thinking=False,
         ),
-        "claude-3-haiku": ModelCapabilities(
-            model_name="claude-3-haiku",
-            friendly_name="Claude 3 Haiku",
-            provider=ProviderType.ANTHROPIC,
-            context_window=200_000,
-            max_output_tokens=4_096,
-            supports_images=True,
-            supports_streaming=True,
-            supports_extended_thinking=False,
-        ),
+    }
+
+    # Model aliases for convenience
+    MODEL_ALIASES: ClassVar[dict[str, str]] = {
+        "opus": "claude-opus-4",
+        "opus-4": "claude-opus-4",
+        "sonnet": "claude-sonnet-4",
+        "sonnet-4": "claude-sonnet-4",
+        "sonnet-3.7": "claude-3.7-sonnet",
+        "sonnet-3.5": "claude-3.5-sonnet",
+        "haiku": "claude-3.5-haiku",
+        "haiku-3.5": "claude-3.5-haiku",
     }
 
     def __init__(self, api_key: str, **kwargs):
@@ -191,16 +226,16 @@ class AnthropicModelProvider(OpenAICompatibleProvider):
             return None
 
         if category == ToolModelCategory.EXTENDED_REASONING:
-            # Prefer Opus for complex reasoning
-            preferred = find_first(["claude-3-opus", "claude-3-sonnet", "claude-3-haiku"])
+            # Prefer Opus 4 for complex reasoning (supports extended thinking)
+            preferred = find_first(["claude-opus-4", "claude-sonnet-4", "claude-3.7-sonnet", "claude-3.5-sonnet", "claude-3.5-haiku"])
             return preferred if preferred else allowed_models[0]
 
         elif category == ToolModelCategory.FAST_RESPONSE:
             # Prefer Haiku for fast responses
-            preferred = find_first(["claude-3-haiku", "claude-3-sonnet", "claude-3-opus"])
+            preferred = find_first(["claude-3.5-haiku", "claude-3.5-sonnet", "claude-sonnet-4", "claude-opus-4"])
             return preferred if preferred else allowed_models[0]
 
         else:  # BALANCED or default
-            # Prefer Sonnet for balanced performance
-            preferred = find_first(["claude-3-sonnet", "claude-3-opus", "claude-3-haiku"])
+            # Prefer Sonnet 4 for balanced performance
+            preferred = find_first(["claude-sonnet-4", "claude-3.7-sonnet", "claude-3.5-sonnet", "claude-opus-4", "claude-3.5-haiku"])
             return preferred if preferred else allowed_models[0]
