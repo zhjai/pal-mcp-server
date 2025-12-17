@@ -33,11 +33,11 @@ class OpenAIModelProvider(RegistryBackedProviderMixin, OpenAICompatibleProvider)
         # Allow override via OPENAI_BASE_URL for third-party compatible APIs
         default_base_url = get_env("OPENAI_BASE_URL", "https://api.openai.com/v1")
         kwargs.setdefault("base_url", default_base_url)
-        
+
         # Log if using custom endpoint
         if default_base_url != "https://api.openai.com/v1":
             logger.info(f"Using custom OpenAI endpoint: {default_base_url}")
-        
+
         super().__init__(api_key, **kwargs)
         self._invalidate_capability_cache()
 
