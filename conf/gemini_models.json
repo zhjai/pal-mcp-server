@@ -27,17 +27,41 @@
   "models": [
     {
       "model_name": "gemini-3-pro-preview",
-      "friendly_name": "Gemini Pro 3.0 Preview",
+      "friendly_name": "Gemini 3 Pro Preview",
       "aliases": [
         "pro",
         "gemini3",
+        "gemini3-pro",
         "gemini-pro"
       ],
       "intelligence_score": 18,
-      "description": "Deep reasoning + thinking mode (1M context) - Complex problems, architecture, deep analysis",
+      "description": "State-of-the-art reasoning and multimodal understanding (1M context) - Complex problems, deep analysis",
       "context_window": 1048576,
       "max_output_tokens": 65536,
       "max_thinking_tokens": 32768,
+      "supports_extended_thinking": true,
+      "supports_system_prompts": true,
+      "supports_streaming": true,
+      "supports_function_calling": true,
+      "supports_json_mode": true,
+      "supports_images": true,
+      "supports_temperature": true,
+      "allow_code_generation": true,
+      "max_image_size_mb": 32.0
+    },
+    {
+      "model_name": "gemini-3-flash-preview",
+      "friendly_name": "Gemini 3 Flash Preview",
+      "aliases": [
+        "flash",
+        "gemini3-flash",
+        "flash3"
+      ],
+      "intelligence_score": 14,
+      "description": "Fastest Gemini 3 with frontier-class performance (1M context) - Visual/spatial reasoning, agentic coding",
+      "context_window": 1048576,
+      "max_output_tokens": 65536,
+      "max_thinking_tokens": 24576,
       "supports_extended_thinking": true,
       "supports_system_prompts": true,
       "supports_streaming": true,
@@ -113,14 +137,79 @@
       "model_name": "gemini-2.5-flash",
       "friendly_name": "Gemini (Flash 2.5)",
       "aliases": [
-        "flash",
-        "flash2.5"
+        "flash2.5",
+        "flash-2.5"
       ],
       "intelligence_score": 10,
       "description": "Ultra-fast (1M context) - Quick analysis, simple queries, rapid iterations",
       "context_window": 1048576,
       "max_output_tokens": 65536,
       "max_thinking_tokens": 24576,
+      "supports_extended_thinking": true,
+      "supports_system_prompts": true,
+      "supports_streaming": true,
+      "supports_function_calling": true,
+      "supports_json_mode": true,
+      "supports_images": true,
+      "supports_temperature": true,
+      "max_image_size_mb": 20.0
+    },
+    {
+      "model_name": "gemini-claude-sonnet-4-5",
+      "friendly_name": "Claude Sonnet 4.5 (via Gemini Proxy)",
+      "aliases": [
+        "claude-sonnet",
+        "sonnet-4.5",
+        "gemini-sonnet"
+      ],
+      "intelligence_score": 17,
+      "description": "Claude Sonnet 4.5 via Gemini proxy - Balanced performance and speed",
+      "context_window": 200000,
+      "max_output_tokens": 16000,
+      "max_thinking_tokens": 0,
+      "supports_extended_thinking": false,
+      "supports_system_prompts": true,
+      "supports_streaming": true,
+      "supports_function_calling": true,
+      "supports_json_mode": true,
+      "supports_images": true,
+      "supports_temperature": true,
+      "max_image_size_mb": 20.0
+    },
+    {
+      "model_name": "gemini-claude-sonnet-4-5-thinking",
+      "friendly_name": "Claude Sonnet 4.5 Thinking (via Gemini Proxy)",
+      "aliases": [
+        "claude-sonnet-thinking",
+        "sonnet-4.5-thinking"
+      ],
+      "intelligence_score": 18,
+      "description": "Claude Sonnet 4.5 with extended thinking via Gemini proxy",
+      "context_window": 200000,
+      "max_output_tokens": 16000,
+      "max_thinking_tokens": 32000,
+      "supports_extended_thinking": true,
+      "supports_system_prompts": true,
+      "supports_streaming": true,
+      "supports_function_calling": true,
+      "supports_json_mode": true,
+      "supports_images": true,
+      "supports_temperature": true,
+      "max_image_size_mb": 20.0
+    },
+    {
+      "model_name": "gemini-claude-opus-4-5-thinking",
+      "friendly_name": "Claude Opus 4.5 Thinking (via Gemini Proxy)",
+      "aliases": [
+        "claude-opus",
+        "opus-4.5",
+        "claude-opus-thinking"
+      ],
+      "intelligence_score": 20,
+      "description": "Claude Opus 4.5 with extended thinking via Gemini proxy - Highest intelligence",
+      "context_window": 200000,
+      "max_output_tokens": 32000,
+      "max_thinking_tokens": 65536,
       "supports_extended_thinking": true,
       "supports_system_prompts": true,
       "supports_streaming": true,
