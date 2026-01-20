@@ -54,6 +54,7 @@ class AnthropicModelProvider(OpenAICompatibleProvider):
             supports_streaming=True,
             supports_extended_thinking=True,
             aliases=["opus", "opus-4"],
+            description="Most intelligent Claude model - Complex reasoning, research, analysis",
         ),
         "claude-sonnet-4": ModelCapabilities(
             model_name="claude-sonnet-4",
@@ -65,6 +66,7 @@ class AnthropicModelProvider(OpenAICompatibleProvider):
             supports_streaming=True,
             supports_extended_thinking=True,
             aliases=["sonnet", "sonnet-4"],
+            description="Balanced performance and speed - Coding, writing, general tasks",
         ),
         # Claude 3.7 Series
         "claude-3.7-sonnet": ModelCapabilities(
@@ -77,6 +79,7 @@ class AnthropicModelProvider(OpenAICompatibleProvider):
             supports_streaming=True,
             supports_extended_thinking=True,
             aliases=["sonnet-3.7"],
+            description="Hybrid reasoning model with extended thinking capabilities",
         ),
         # Claude 3.5 Series (October 2024)
         "claude-3.5-sonnet": ModelCapabilities(
@@ -89,6 +92,7 @@ class AnthropicModelProvider(OpenAICompatibleProvider):
             supports_streaming=True,
             supports_extended_thinking=False,
             aliases=["sonnet-3.5"],
+            description="Fast and capable - General purpose tasks",
         ),
         "claude-3.5-haiku": ModelCapabilities(
             model_name="claude-3.5-haiku",
@@ -100,6 +104,7 @@ class AnthropicModelProvider(OpenAICompatibleProvider):
             supports_streaming=True,
             supports_extended_thinking=False,
             aliases=["haiku", "haiku-3.5"],
+            description="Fastest Claude model - Quick responses, simple tasks",
         ),
     }
 
