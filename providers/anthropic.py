@@ -42,69 +42,44 @@ class AnthropicModelProvider(OpenAICompatibleProvider):
 
     # Basic model capabilities for common Anthropic models
     # These are conservative defaults; actual capabilities may vary
+    # Note: Using gemini-claude-* naming for proxy compatibility
     MODEL_CAPABILITIES: ClassVar[dict[str, ModelCapabilities]] = {
-        # Claude 4 Series (Latest - May 2025)
-        "claude-opus-4": ModelCapabilities(
-            model_name="claude-opus-4",
-            friendly_name="Claude Opus 4",
+        # Claude via Gemini Proxy
+        "gemini-claude-opus-4-5-thinking": ModelCapabilities(
+            model_name="gemini-claude-opus-4-5-thinking",
+            friendly_name="Claude Opus 4.5 Thinking",
             provider=ProviderType.ANTHROPIC,
             context_window=200_000,
             max_output_tokens=32_000,
             supports_images=True,
             supports_streaming=True,
             supports_extended_thinking=True,
-            aliases=["opus", "opus-4"],
-            description="Most intelligent Claude model - Complex reasoning, research, analysis",
+            aliases=["opus", "opus-4", "claude-opus", "opus-4.5"],
+            description="Most intelligent Claude model with extended thinking - Complex reasoning, research, analysis",
         ),
-        "claude-sonnet-4": ModelCapabilities(
-            model_name="claude-sonnet-4",
-            friendly_name="Claude Sonnet 4",
+        "gemini-claude-sonnet-4-5": ModelCapabilities(
+            model_name="gemini-claude-sonnet-4-5",
+            friendly_name="Claude Sonnet 4.5",
+            provider=ProviderType.ANTHROPIC,
+            context_window=200_000,
+            max_output_tokens=16_000,
+            supports_images=True,
+            supports_streaming=True,
+            supports_extended_thinking=False,
+            aliases=["sonnet", "sonnet-4", "claude-sonnet", "sonnet-4.5"],
+            description="Balanced performance and speed - Coding, writing, general tasks",
+        ),
+        "gemini-claude-sonnet-4-5-thinking": ModelCapabilities(
+            model_name="gemini-claude-sonnet-4-5-thinking",
+            friendly_name="Claude Sonnet 4.5 Thinking",
             provider=ProviderType.ANTHROPIC,
             context_window=200_000,
             max_output_tokens=16_000,
             supports_images=True,
             supports_streaming=True,
             supports_extended_thinking=True,
-            aliases=["sonnet", "sonnet-4"],
-            description="Balanced performance and speed - Coding, writing, general tasks",
-        ),
-        # Claude 3.7 Series
-        "claude-3.7-sonnet": ModelCapabilities(
-            model_name="claude-3.7-sonnet",
-            friendly_name="Claude 3.7 Sonnet",
-            provider=ProviderType.ANTHROPIC,
-            context_window=200_000,
-            max_output_tokens=8_192,
-            supports_images=True,
-            supports_streaming=True,
-            supports_extended_thinking=True,
-            aliases=["sonnet-3.7"],
-            description="Hybrid reasoning model with extended thinking capabilities",
-        ),
-        # Claude 3.5 Series (October 2024)
-        "claude-3.5-sonnet": ModelCapabilities(
-            model_name="claude-3.5-sonnet",
-            friendly_name="Claude 3.5 Sonnet",
-            provider=ProviderType.ANTHROPIC,
-            context_window=200_000,
-            max_output_tokens=8_192,
-            supports_images=True,
-            supports_streaming=True,
-            supports_extended_thinking=False,
-            aliases=["sonnet-3.5"],
-            description="Fast and capable - General purpose tasks",
-        ),
-        "claude-3.5-haiku": ModelCapabilities(
-            model_name="claude-3.5-haiku",
-            friendly_name="Claude 3.5 Haiku",
-            provider=ProviderType.ANTHROPIC,
-            context_window=200_000,
-            max_output_tokens=8_192,
-            supports_images=True,
-            supports_streaming=True,
-            supports_extended_thinking=False,
-            aliases=["haiku", "haiku-3.5"],
-            description="Fastest Claude model - Quick responses, simple tasks",
+            aliases=["sonnet-thinking", "claude-sonnet-thinking"],
+            description="Claude Sonnet with extended thinking - Deep reasoning tasks",
         ),
     }
 
@@ -146,9 +121,13 @@ class AnthropicModelProvider(OpenAICompatibleProvider):
         Returns:
             True if the model is supported, False otherwise
         """
-        # Accept known Anthropic model patterns
+        # Accept known Anthropic model patterns (including gemini-claude-* for proxy)
         model_lower = model_name.lower()
-        return model_lower.startswith("claude-") or model_name in self.MODEL_CAPABILITIES
+        return (
+            model_lower.startswith("claude-")
+            or model_lower.startswith("gemini-claude-")
+            or model_name in self.MODEL_CAPABILITIES
+        )
 
     def get_capabilities(self, model_name: str) -> ModelCapabilities:
         """Get capabilities for a specific model.
@@ -224,16 +203,28 @@ class AnthropicModelProvider(OpenAICompatibleProvider):
             return None
 
         if category == ToolModelCategory.EXTENDED_REASONING:
-            # Prefer Opus 4 for complex reasoning (supports extended thinking)
-            preferred = find_first(["claude-opus-4", "claude-sonnet-4", "claude-3.7-sonnet", "claude-3.5-sonnet", "claude-3.5-haiku"])
+            # Prefer Opus for complex reasoning (supports extended thinking)
+            preferred = find_first([
+                "gemini-claude-opus-4-5-thinking",
+                "gemini-claude-sonnet-4-5-thinking",
+                "gemini-claude-sonnet-4-5",
+            ])
             return preferred if preferred else allowed_models[0]
 
         elif category == ToolModelCategory.FAST_RESPONSE:
-            # Prefer Haiku for fast responses
-            preferred = find_first(["claude-3.5-haiku", "claude-3.5-sonnet", "claude-sonnet-4", "claude-opus-4"])
+            # Prefer Sonnet for fast responses
+            preferred = find_first([
+                "gemini-claude-sonnet-4-5",
+                "gemini-claude-sonnet-4-5-thinking",
+                "gemini-claude-opus-4-5-thinking",
+            ])
             return preferred if preferred else allowed_models[0]
 
         else:  # BALANCED or default
-            # Prefer Sonnet 4 for balanced performance
-            preferred = find_first(["claude-sonnet-4", "claude-3.7-sonnet", "claude-3.5-sonnet", "claude-opus-4", "claude-3.5-haiku"])
+            # Prefer Sonnet for balanced performance
+            preferred = find_first([
+                "gemini-claude-sonnet-4-5",
+                "gemini-claude-opus-4-5-thinking",
+                "gemini-claude-sonnet-4-5-thinking",
+            ])
             return preferred if preferred else allowed_models[0]
